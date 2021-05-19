@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props"></Import>
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <AssetTargetFallback>$(AssetTargetFallback);portable-net45+win8+wp8+wpa81;</AssetTargetFallback>
+    <AssemblyName>Afonsoft.NewTemplate.Application</AssemblyName>
+    <PackageId>Afonsoft.NewTemplate.Application</PackageId>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <RootNamespace>Afonsoft.NewTemplate</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Abp.EntityFrameworkCore.EFPlus" Version="6.3.0" />
+    <PackageReference Include="NPOI" Version="2.5.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Afonsoft.NewTemplate.Application.Shared\Afonsoft.NewTemplate.Application.Shared.csproj" />
+    <ProjectReference Include="..\Afonsoft.NewTemplate.Core\Afonsoft.NewTemplate.Core.csproj" />
+    <ProjectReference Include="..\Afonsoft.NewTemplate.EntityFrameworkCore\Afonsoft.NewTemplate.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>
