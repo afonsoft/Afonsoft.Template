@@ -30,6 +30,14 @@ namespace Afonsoft.NewTemplate.Web.Startup
         {
             Configuration.Modules.AbpWebCommon().MultiTenancy.DomainFormat = _appConfiguration["App:WebSiteRootAddress"] ?? "https://localhost:44302/";
             Configuration.Modules.AspNetZero().LicenseCode = "AFONSOFT";
+
+            Configuration.Modules.AbpWebCommon().SendAllExceptionsToClients = true;
+
+            Configuration.Auditing.IsEnabledForAnonymousUsers = false;
+            Configuration.Auditing.IsEnabled = true;
+            Configuration.EntityHistory.IsEnabled = true;
+            Configuration.EntityHistory.IsEnabledForAnonymousUsers = false;
+
             Configuration.Navigation.Providers.Add<AppNavigationProvider>();
 
             IocManager.Register<DashboardViewConfiguration>();
@@ -56,10 +64,13 @@ namespace Afonsoft.NewTemplate.Web.Startup
             }
 
             var workManager = IocManager.Resolve<IBackgroundWorkerManager>();
-            workManager.Add(IocManager.Resolve<SubscriptionExpirationCheckWorker>());
-            workManager.Add(IocManager.Resolve<SubscriptionExpireEmailNotifierWorker>());
+            if (IocManager.Resolve<IMultiTenancyConfig>().IsEnabled)
+            {
+                workManager.Add(IocManager.Resolve<SubscriptionExpirationCheckWorker>());
+                workManager.Add(IocManager.Resolve<SubscriptionExpireEmailNotifierWorker>());
+            }
 
-            if (Configuration.Auditing.IsEnabled && ExpiredAuditLogDeleterWorker.IsEnabled)
+            if (Configuration.Auditing.IsEnabled)
             {
                 workManager.Add(IocManager.Resolve<ExpiredAuditLogDeleterWorker>());
             }

@@ -16,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Abp.AspNetZeroCore\Abp.AspNetZeroCore\Abp.AspNetZeroCore.csproj" />
     <ProjectReference Include="..\Afonsoft.NewTemplate.Application\Afonsoft.NewTemplate.Application.csproj" />
     <ProjectReference Include="..\Afonsoft.NewTemplate.EntityFrameworkCore\Afonsoft.NewTemplate.EntityFrameworkCore.csproj" />
   </ItemGroup>

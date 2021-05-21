@@ -17,12 +17,6 @@ namespace Afonsoft.NewTemplate.Auditing
 {
     public class ExpiredAuditLogDeleterWorker : PeriodicBackgroundWorkerBase, ISingletonDependency
     {
-        /// <summary>
-        /// Set this const field to true if you want to enable ExpiredAuditLogDeleterWorker.
-        /// Be careful, If you enable this, all expired logs will be permanently deleted.
-        /// </summary>
-        public const bool IsEnabled = false;
-
         private const int CheckPeriodAsMilliseconds = 1 * 1000 * 60 * 3; // 3min
         private const int MaxDeletionCount = 10000;
 

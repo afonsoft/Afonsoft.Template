@@ -34,7 +34,7 @@ namespace Afonsoft.NewTemplate.Web.Startup
                 {
                     services.AddSingleton<IOptionsMonitor<OpenIdConnectOptions>, TenantBasedOpenIdConnectOptions>();
                 }
-                
+
                 authenticationBuilder.AddOpenIdConnect(options =>
                 {
                     options.ClientId = configuration["Authentication:OpenId:ClientId"];
@@ -139,7 +139,7 @@ namespace Afonsoft.NewTemplate.Web.Startup
                 {
                     services.AddSingleton<IOptionsMonitor<WsFederationOptions>, TenantBasedWsFederationOptions>();
                 }
-                
+
                 authenticationBuilder.AddWsFederation(options =>
                 {
                     options.MetadataAddress = configuration["Authentication:WsFederation:MetaDataAddress"];

@@ -41,9 +41,15 @@ namespace Afonsoft.NewTemplate.Web.Startup
 
         public override void PreInitialize()
         {
-            Configuration.Modules.AbpWebCommon().MultiTenancy.DomainFormat =
-                _appConfiguration["App:ServerRootAddress"] ?? "https://localhost:44301/";
+            Configuration.Modules.AbpWebCommon().MultiTenancy.DomainFormat = _appConfiguration["App:ServerRootAddress"] ?? "https://localhost:44301/";
             Configuration.Modules.AspNetZero().LicenseCode = "AFONSOFT";
+
+            Configuration.Modules.AbpWebCommon().SendAllExceptionsToClients = true;
+
+            Configuration.Auditing.IsEnabledForAnonymousUsers = false;
+            Configuration.Auditing.IsEnabled = true;
+            Configuration.EntityHistory.IsEnabled = true;
+            Configuration.EntityHistory.IsEnabledForAnonymousUsers = false;
         }
 
         public override void Initialize()
@@ -68,7 +74,7 @@ namespace Afonsoft.NewTemplate.Web.Startup
                 workManager.Add(IocManager.Resolve<SubscriptionExpireEmailNotifierWorker>());
             }
 
-            if (Configuration.Auditing.IsEnabled && ExpiredAuditLogDeleterWorker.IsEnabled)
+            if (Configuration.Auditing.IsEnabled)
             {
                 workManager.Add(IocManager.Resolve<ExpiredAuditLogDeleterWorker>());
             }
