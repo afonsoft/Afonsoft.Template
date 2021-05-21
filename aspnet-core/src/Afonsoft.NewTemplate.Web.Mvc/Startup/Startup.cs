@@ -37,6 +37,9 @@ using Afonsoft.NewTemplate.Web.HealthCheck;
 using Owl.reCAPTCHA;
 using HealthChecksUISettings = HealthChecks.UI.Configuration.Settings;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.ResponseCompression;
+using System.IO.Compression;
 
 namespace Afonsoft.NewTemplate.Web.Startup
 {
@@ -55,13 +58,12 @@ namespace Afonsoft.NewTemplate.Web.Startup
         {
             // MVC
             services.AddControllersWithViews(options =>
-                {
-                    options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
-                })
-#if DEBUG
+            {
+                options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
+            })
                 .AddRazorRuntimeCompilation()
-#endif
                 .AddNewtonsoftJson();
+
             if (bool.Parse(_appConfiguration["KestrelServer:IsEnabled"]))
             {
                 ConfigureKestrel(services);
@@ -86,7 +88,7 @@ namespace Afonsoft.NewTemplate.Web.Startup
             //Swagger - Enable this line and the related lines in Configure method to enable swagger UI
             services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo() { Title = "NewTemplate API", Version = "v1" });
+                options.SwaggerDoc("v1", new OpenApiInfo() { Title = "Ranking API", Version = "v1" });
                 options.DocInclusionPredicate((docName, description) => true);
                 options.ParameterFilter<SwaggerEnumParameterFilter>();
                 options.SchemaFilter<SwaggerEnumSchemaFilter>();
@@ -114,8 +116,28 @@ namespace Afonsoft.NewTemplate.Web.Startup
 
             services.Configure<SecurityStampValidatorOptions>(options =>
             {
-                options.ValidationInterval = TimeSpan.Zero;
+                options.ValidationInterval = TimeSpan.FromMinutes(30);
             });
+
+            services.AddAntiforgery();
+            services.AddHttpClient();
+            services.AddDistributedMemoryCache();
+            services.AddSwaggerGenNewtonsoftSupport();
+
+            services.AddDataProtection()
+            .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(_hostingEnvironment.WebRootPath, "Data")))
+            .SetDefaultKeyLifetime(TimeSpan.FromDays(365))
+            .SetApplicationName(_hostingEnvironment.ApplicationName);
+
+            services.AddResponseCompression(options =>
+            {
+                options.Providers.Add<GzipCompressionProvider>();
+                options.Providers.Add<BrotliCompressionProvider>();
+                options.EnableForHttps = true;
+            });
+
+            services.Configure<BrotliCompressionProviderOptions>(options => { options.Level = CompressionLevel.Fastest; });
+            services.Configure<GzipCompressionProviderOptions>(options => { options.Level = CompressionLevel.Fastest; });
 
             if (bool.Parse(_appConfiguration["HealthChecks:HealthChecksEnabled"]))
             {
@@ -161,6 +183,7 @@ namespace Afonsoft.NewTemplate.Web.Startup
             app.UseAbp(options =>
             {
                 options.UseAbpRequestLocalization = false; //used below: UseAbpRequestLocalization
+                options.UseCastleLoggerFactory = true;
             });
 
             if (env.IsDevelopment())
@@ -173,6 +196,7 @@ namespace Afonsoft.NewTemplate.Web.Startup
                 app.UseExceptionHandler("/Error");
             }
 
+            app.UseHsts();
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
@@ -205,10 +229,16 @@ namespace Afonsoft.NewTemplate.Web.Startup
             //Hangfire dashboard & server (Enable to use Hangfire instead of default job manager)
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
-                Authorization = new[]
-                    {new AbpHangfireAuthorizationFilter(AppPermissions.Pages_Administration_HangfireDashboard)}
+                Authorization = new[] {
+                    new AbpHangfireAuthorizationFilter(AppPermissions.Pages_Administration_HangfireDashboard),
+                    new AbpHangfireAuthorizationFilter(AppPermissions.Pages_Administration),
+                },
+                IgnoreAntiforgeryToken = true,
             });
             app.UseHangfireServer();
+
+            app.UseWebSockets();
+            app.UseResponseCompression();
 
             if (bool.Parse(_appConfiguration["Payment:Stripe:IsActive"]))
             {
@@ -248,9 +278,9 @@ namespace Afonsoft.NewTemplate.Web.Startup
             //Enable middleware to serve swagger - ui assets(HTML, JS, CSS etc.)
             app.UseSwaggerUI(options =>
             {
-                options.SwaggerEndpoint(_appConfiguration["App:SwaggerEndPoint"], "NewTemplate API V1");
+                options.SwaggerEndpoint(_appConfiguration["App:SwaggerEndPoint"], "Ranking API V1");
                 options.IndexStream = () => Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("Afonsoft.NewTemplate.Web.wwwroot.swagger.ui.index.html");
+                    .GetManifestResourceStream("Afonsoft.Ranking.Web.wwwroot.swagger.ui.index.html");
                 options.InjectBaseUrl(_appConfiguration["App:WebSiteRootAddress"]);
             }); //URL: /swagger
         }
